@@ -1,13 +1,12 @@
-Class = require 'class'
-require 'Utils'
-Vector = require 'vector'
-Color = require 'color'
+Class = require 'lib.class'
+require 'lib.Utils'
+Vector = require 'lib.vector'
+Color = require 'lib.color'
 midi = require "luamidi"
-json = require "json"
-inspect = require "inspect"
-midi = require "luamidi"
-require 'boid'
-local Timer = require "timer"
+json = require "lib.json"
+-- inspect = require "lib.inspect"
+require 'lib.boid'
+local Timer = require "lib.timer"
 local time = 0
 function love.load(arg)
     -- Settup the window
