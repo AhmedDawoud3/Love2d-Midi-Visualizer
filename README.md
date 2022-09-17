@@ -45,7 +45,7 @@ Then using [the flocking simulation](http://www.red3d.com/cwr/boids/), The boids
 - Then find a midi song you wish to play. Check [bitmidi](https://bitmidi.com/) for free midi files.<br>
   Then you'll have to convert it to a json file using [this Converter](https://www.visipiano.com/midi-to-json-converter/).
   <br>
-  I've provided an [example song](https://github.com/AhmedDawoud3/Love2d-Midi-Visualizer/blob/main/song.json) in the repo.
+  I've provided an [example song](https://github.com/AhmedDawoud3/Love2d-Midi-Visualizer/blob/master/song.json) in the repo.
 
 <!-- USAGE EXAMPLES -->
 
@@ -86,7 +86,7 @@ Don't forget to give the project a star! Thanks again!
 
 ## License
 
-Distributed under the MIT License. See [License](https://github.com/AhmedDawoud3/Love2d-Midi-Visualizer/blob/main/LICENSE) for more information.
+Distributed under the MIT License. See [License](https://github.com/AhmedDawoud3/Love2d-Midi-Visualizer/blob/master/LICENSE) for more information.
 
 <!-- CONTACT -->
 
