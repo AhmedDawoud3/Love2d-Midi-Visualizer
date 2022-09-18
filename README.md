@@ -40,7 +40,7 @@ Then using [the flocking simulation](http://www.red3d.com/cwr/boids/), The boids
 
 - First install [LÖVE](https://love2d.org/) if you haven't already.
 
-- Then download [luamidi.dll_32](https://github.com/SiENcE/lovemidi/blob/master/tests/love2d/luamidi.dll) OR [luamidi.dll_64](https://github.com/SiENcE/lovemidi/blob/master/tests/love2d/luamidi.dll_64) _depending on the version of love you downloaded_ and place it in your Love2d folder _(typically C:\Program Files\LOVE)_ .
+- Then download [luamidi.dll_32](https://github.com/SiENcE/lovemidi/blob/master/tests/love2d/luamidi.dll) OR [luamidi.dll_64](https://github.com/SiENcE/lovemidi/blob/master/tests/love2d/luamidi.dll_64) _depending on the version of love you downloaded_ then rename it to `luamidi.dll` and place it in your Love2d folder _(typically C:\Program Files\LOVE)_ .
 
 - Then find a midi song you wish to play. Check [bitmidi](https://bitmidi.com/) for free midi files.<br>
   Then you'll have to convert it to a json file using [this Converter](https://www.visipiano.com/midi-to-json-converter/).
