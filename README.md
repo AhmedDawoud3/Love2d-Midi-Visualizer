@@ -30,6 +30,9 @@ By using the midi files, firstly converting them into json files to make them
 readable with lua. Then parsing the music data to play the corresponding notes with luamidi.dll.
 Then using [the flocking simulation](http://www.red3d.com/cwr/boids/), The boids are triggered by the notes.
 
+![Animation](https://user-images.githubusercontent.com/68483546/191001975-f9fd7a7c-a631-4ec2-a661-19dc660cf7b5.gif)
+
+
 ### Built With
 
 [![LOVE](https://img.shields.io/badge/L%C3%96VE-11.4-EA316E.svg)](http://love2d.org/)
