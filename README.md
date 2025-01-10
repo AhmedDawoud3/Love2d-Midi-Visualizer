@@ -95,7 +95,7 @@ Distributed under the MIT License. See [License](https://github.com/AhmedDawoud3
 
 ## Contact
 
-Ahmed Dawoud - [@AhmedDawoud314](https://twitter.com/AhmedDawoud314) - adawoud1000@hotmail.com
+Ahmed Dawoud - [@AhmedDawoud314](https://twitter.com/AhmedDawoud314)
 
 Project Link: [https://github.com/AhmedDawoud3/Love2d-Midi-Visualizer](https://github.com/AhmedDawoud3/Love2d-Midi-Visualizer)
 
