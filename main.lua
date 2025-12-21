@@ -51,6 +51,9 @@ local gameState = {
     originalTracks = nil  -- Store original track data for restart/seek
 }
 
+-- Constant to mark notes as played (prevents re-triggering)
+local NOTE_PLAYED_TIME = 1e10
+
 --- Convert MIDI note value to X screen position
 -- @param midiValue number The MIDI note value
 -- @return number X position on screen
@@ -140,7 +143,7 @@ local function processMidiTracks(dt)
                 
                 -- Mark note as played (prevent re-triggering)
                 note.played = gameState.time
-                note.time = 10 ^ 10
+                note.time = NOTE_PLAYED_TIME
             end
         end
     end
@@ -236,7 +239,7 @@ local function seekToTime(newTime)
     for _, track in ipairs(gameState.tracks) do
         for _, note in ipairs(track.notes) do
             if note.time < newTime then
-                note.time = 10 ^ 10
+                note.time = NOTE_PLAYED_TIME
             end
         end
     end
@@ -282,13 +285,7 @@ local function setupControlPanel()
     -- Playback speed slider
     Panel.addSlider("speed", "Playback Speed", 0.25, 2.0, 1.0, function(value)
         gameState.playbackSpeed = value
-        -- Update speed index to nearest
-        for i, speed in ipairs(Config.PLAYBACK.SPEEDS) do
-            if math.abs(speed - value) < 0.1 then
-                gameState.speedIndex = i
-                break
-            end
-        end
+        -- Speed index updates are only needed for arrow key presets
     end)
     
     -- Boid settings sliders

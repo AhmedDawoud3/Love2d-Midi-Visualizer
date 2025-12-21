@@ -232,9 +232,10 @@ local function drawWaveformMode(flocks, mutedTracks, playingNotes)
                 love.graphics.setColor(1, 1, 1, 0.7)
             end
             
-            -- Calculate bar properties
-            local barWidth = width / 60  -- 60 bars across screen
-            local barX = (note.midi % 60) * barWidth
+            -- Calculate bar properties based on MIDI note range (128 possible notes)
+            local numBars = 88  -- Standard piano range
+            local barWidth = width / numBars
+            local barX = ((note.midi - 21) % numBars) * barWidth  -- 21 is A0 (lowest piano key)
             local barHeight = note.velocity * 200
             
             love.graphics.rectangle("fill", barX, centerY - barHeight / 2, barWidth - 2, barHeight)
