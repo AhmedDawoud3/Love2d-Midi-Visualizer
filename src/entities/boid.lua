@@ -9,6 +9,14 @@ local Config = require "src.config"
 
 local Boid = Class {}
 
+--- Calculate distance between two vectors
+-- @param a Vector First vector
+-- @param b Vector Second vector
+-- @return number Distance between the vectors
+local function dist(a, b)
+    return math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2)
+end
+
 --- Initialize a new Boid
 -- @param pos Vector Initial position
 -- @param vel Vector Initial velocity
@@ -59,7 +67,7 @@ function Boid:align(boids)
     local steering = Vector()
     
     for _, other in ipairs(boids) do
-        local distance = Vector.dist(self.position, other.position)
+        local distance = dist(self.position, other.position)
         if other ~= self and distance < perceptionRadius then
             steering = steering + other.velocity
             total = total + 1
@@ -85,7 +93,7 @@ function Boid:cohesion(boids)
     local total = 0
     
     for _, other in ipairs(boids) do
-        local distance = Vector.dist(self.position, other.position)
+        local distance = dist(self.position, other.position)
         if other ~= self and distance < perceptionRadius then
             steering = steering + other.position
             total = total + 1
@@ -112,7 +120,7 @@ function Boid:separation(boids)
     local total = 0
     
     for _, other in ipairs(boids) do
-        local distance = Vector.dist(self.position, other.position)
+        local distance = dist(self.position, other.position)
         if other ~= self and distance < perceptionRadius then
             local diff = self.position - other.position
             diff = diff / distance
