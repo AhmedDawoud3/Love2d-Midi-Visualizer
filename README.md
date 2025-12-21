@@ -15,7 +15,7 @@
     <li><a href="#about-the-project">About The Project</a></li>
     <li><a href="#getting-started">Getting Started</a></li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#usage">Usage</a></li>
+    <li><a href="#project-structure">Project Structure</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -72,6 +72,33 @@ love . song.json
 
 Et voilà
 
+<!-- PROJECT STRUCTURE -->
+
+## Project Structure
+
+```
+Love2d-Midi-Visualizer/
+├── conf.lua                 # Love2D configuration file
+├── main.lua                 # Main entry point
+├── fonts/                   # Font assets
+├── lib/                     # Third-party libraries
+│   ├── class.lua           # OOP class system
+│   ├── color.lua           # Color utilities
+│   ├── json.lua            # JSON parser
+│   ├── timer.lua           # Timer system
+│   ├── vector.lua          # Vector math library
+│   └── ...
+├── src/                     # Source code modules
+│   ├── config.lua          # Configuration constants
+│   ├── entities/           # Entity classes
+│   │   └── boid.lua        # Boid flocking simulation
+│   ├── midi/               # MIDI handling
+│   │   └── parser.lua      # MIDI JSON file parser
+│   └── visualizer/         # Visualization modules
+│       └── renderer.lua    # Rendering logic
+└── song.json               # Example MIDI file (JSON format)
+```
+
 <!-- CONTRIBUTING -->
 
 ## Contributing
@@ -98,4 +125,5 @@ Distributed under the MIT License. See [License](https://github.com/AhmedDawoud3
 Ahmed Dawoud - [@AhmedDawoud314](https://twitter.com/AhmedDawoud314)
 
 Project Link: [https://github.com/AhmedDawoud3/Love2d-Midi-Visualizer](https://github.com/AhmedDawoud3/Love2d-Midi-Visualizer)
+
 
