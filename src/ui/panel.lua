@@ -119,23 +119,32 @@ end
 function Panel.mousepressed(x, y, button)
     if not state.visible then return false end
     
+    local panelHeight = Panel.getHeight()
+    
+    -- Check if click is inside panel first
+    if x < state.x or x > state.x + state.width or
+       y < state.y or y > state.y + panelHeight then
+        return false
+    end
+    
     -- Check if click is on panel header (for dragging)
-    if x >= state.x and x <= state.x + state.width and
-       y >= state.y and y <= state.y + 25 then
+    if y >= state.y and y <= state.y + 25 then
         state.isDragging = true
         state.dragOffsetX = x - state.x
         state.dragOffsetY = y - state.y
         return true
     end
     
-    -- Check sliders
+    -- Check sliders - match the draw positions (label at sliderY, slider at sliderY + 18)
     local sliderY = state.y + 35
     for id, slider in pairs(state.sliders) do
         local sliderX = state.x + Config.UI.PANEL_PADDING
         local sliderWidth = state.width - Config.UI.PANEL_PADDING * 2
+        local sliderTop = sliderY + 18
+        local sliderBottom = sliderTop + Config.UI.SLIDER_HEIGHT
         
         if x >= sliderX and x <= sliderX + sliderWidth and
-           y >= sliderY and y <= sliderY + Config.UI.SLIDER_HEIGHT then
+           y >= sliderTop and y <= sliderBottom then
             state.activeSlider = id
             -- Update value based on click position
             local ratio = (x - sliderX) / sliderWidth
@@ -166,13 +175,8 @@ function Panel.mousepressed(x, y, button)
         buttonY = buttonY + buttonHeight + 5
     end
     
-    -- Check if click is inside panel (consume event)
-    if x >= state.x and x <= state.x + state.width and
-       y >= state.y and y <= state.y + Panel.getHeight() then
-        return true
-    end
-    
-    return false
+    -- Click is inside panel but not on any control - consume event
+    return true
 end
 
 --- Handle mouse release

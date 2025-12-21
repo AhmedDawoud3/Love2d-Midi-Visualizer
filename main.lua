@@ -100,7 +100,7 @@ local function triggerNote(trackIndex, noteData)
     -- Spawn a boid for this note
     local spawnX = getXFromMidi(noteData.midi)
     local spawnY = Config.BOID.SPAWN_Y
-    local velocity = Vector(0, -noteData.velocity * 1000)
+    local velocity = Vector(0, -noteData.velocity * 10)  -- Reduced from 1000 to 10
     
     table.insert(gameState.flocks[trackIndex], Boid(Vector(spawnX, spawnY), velocity))
     
@@ -288,20 +288,20 @@ local function setupControlPanel()
         -- Speed index updates are only needed for arrow key presets
     end)
     
-    -- Boid settings sliders
-    Panel.addSlider("maxSpeed", "Boid Max Speed", 1, 10, Config.BOID.MAX_SPEED, function(value)
+    -- Boid settings sliders with reduced ranges
+    Panel.addSlider("maxSpeed", "Boid Max Speed", 0.5, 5, Config.BOID.MAX_SPEED, function(value)
         Config.BOID.MAX_SPEED = value
     end)
     
-    Panel.addSlider("maxForce", "Boid Max Force", 0.05, 1.0, Config.BOID.MAX_FORCE, function(value)
+    Panel.addSlider("maxForce", "Boid Max Force", 0.01, 0.3, Config.BOID.MAX_FORCE, function(value)
         Config.BOID.MAX_FORCE = value
     end)
     
-    Panel.addSlider("boidSize", "Boid Size", 1, 10, Config.BOID.SIZE, function(value)
+    Panel.addSlider("boidSize", "Boid Size", 1, 8, Config.BOID.SIZE, function(value)
         Config.BOID.SIZE = value
     end)
     
-    Panel.addSlider("perception", "Perception Radius", 50, 300, Config.BOID.PERCEPTION_RADIUS_ALIGN, function(value)
+    Panel.addSlider("perception", "Perception Radius", 20, 150, Config.BOID.PERCEPTION_RADIUS_ALIGN, function(value)
         Config.BOID.PERCEPTION_RADIUS_ALIGN = value
         Config.BOID.PERCEPTION_RADIUS_COHESION = value * 1.5
         Config.BOID.PERCEPTION_RADIUS_SEPARATION = value * 1.5
