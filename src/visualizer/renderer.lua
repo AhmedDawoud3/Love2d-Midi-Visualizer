@@ -130,6 +130,11 @@ end
 --- Update persistent trails (remove expired ones)
 -- @param dt number Delta time
 function Renderer.updatePersistentTrails(dt)
+    -- If permanent mode is enabled, don't remove any trails
+    if Config.TRAIL.PERMANENT then
+        return
+    end
+    
     local currentTime = love.timer.getTime()
     
     -- Remove expired trails
@@ -220,10 +225,18 @@ local function drawPersistentTrails()
     local currentTime = love.timer.getTime()
     
     for _, trail in ipairs(persistentTrails) do
-        local age = currentTime - trail.createdAt
-        local lifeRatio = 1 - (age / trail.persistTime)  -- 1 = just created, 0 = about to expire
+        local alpha
         
-        local alpha = Config.TRAIL.FADE_START_ALPHA * lifeRatio
+        if Config.TRAIL.PERMANENT then
+            -- Use lower, constant alpha for permanent trails
+            alpha = Config.TRAIL.PERMANENT_ALPHA
+        else
+            -- Fade out over time
+            local age = currentTime - trail.createdAt
+            local lifeRatio = 1 - (age / trail.persistTime)  -- 1 = just created, 0 = about to expire
+            alpha = Config.TRAIL.FADE_START_ALPHA * lifeRatio
+        end
+        
         local trackColor = colors.tracks[trail.trackIndex]
         
         drawBeautifulTrail(trail.points, trackColor, alpha)

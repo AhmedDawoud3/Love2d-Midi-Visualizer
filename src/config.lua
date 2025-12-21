@@ -81,6 +81,8 @@ Config.BOID = {
 -- Trail settings
 Config.TRAIL = {
     PERSIST_TIME = 5.0,        -- How long trails persist after boid deletion (seconds)
+    PERMANENT = false,         -- If true, trails never expire (lower transparency)
+    PERMANENT_ALPHA = 0.3,     -- Alpha for permanent trails (lower than active trails)
     MAX_WIDTH = 3,             -- Maximum trail line width
     MIN_WIDTH = 0.5,           -- Minimum trail line width at the end
     FADE_START_ALPHA = 0.8,    -- Starting alpha for trails

@@ -304,6 +304,11 @@ local function setupControlPanel()
         Config.TRAIL.MAX_WIDTH = value
     end)
     
+    -- Permanent trail alpha slider
+    Panel.addSlider("permAlpha", "Permanent Alpha", 0.1, 0.6, Config.TRAIL.PERMANENT_ALPHA, function(value)
+        Config.TRAIL.PERMANENT_ALPHA = value
+    end)
+    
     -- Boid settings sliders with reduced ranges
     Panel.addSlider("maxSpeed", "Boid Max Speed", 0.5, 5, Config.BOID.MAX_SPEED, function(value)
         Config.BOID.MAX_SPEED = value
@@ -324,6 +329,12 @@ local function setupControlPanel()
     end)
     
     -- Buttons
+    Panel.addButton("permTrails", "Permanent Trails: OFF", function()
+        Config.TRAIL.PERMANENT = not Config.TRAIL.PERMANENT
+        local label = Config.TRAIL.PERMANENT and "Permanent Trails: ON" or "Permanent Trails: OFF"
+        Panel.setButtonLabel("permTrails", label)
+    end)
+    
     Panel.addButton("theme", "Toggle Theme (T)", function()
         Renderer.toggleTheme()
         Panel.setup()  -- Refresh panel colors
