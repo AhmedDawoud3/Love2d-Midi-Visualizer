@@ -1,3 +1,22 @@
+# Unused library files
 /denver.lua
 /inspect.lua
 /midi
+
+# Love2D build artifacts
+*.love
+*.exe
+*.app
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
