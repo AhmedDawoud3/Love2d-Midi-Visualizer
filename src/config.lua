@@ -50,4 +50,10 @@ Config.FONTS = {
     DEFAULT_SIZE = 12
 }
 
+-- UI settings
+Config.UI = {
+    CONTROLS_MARGIN_RIGHT = 10,
+    CONTROLS_MARGIN_BOTTOM = 25
+}
+
 return Config

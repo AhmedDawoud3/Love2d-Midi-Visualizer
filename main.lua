@@ -3,6 +3,12 @@
     A music visualizer that uses MIDI files to create a boid flocking animation
 
     Usage: love . song.json
+           Or drag and drop a JSON file onto the window
+    
+    Controls:
+        Space - Pause/Resume
+        R     - Restart song
+        Escape - Quit
     
     Author: Ahmed Dawoud
     Repository: https://github.com/AhmedDawoud3/Love2d-Midi-Visualizer
@@ -27,7 +33,10 @@ local gameState = {
     playingNotes = {},
     midiData = nil,
     pixelsPerNote = 0,
-    defaultFont = nil
+    defaultFont = nil,
+    isPaused = false,
+    isLoaded = false,
+    currentFile = nil
 }
 
 --- Convert MIDI note value to X screen position
@@ -119,6 +128,63 @@ local function processMidiTracks(dt)
     end
 end
 
+--- Reset game state for a new song or restart
+local function resetGameState()
+    gameState.time = 0
+    gameState.tracks = {}
+    gameState.flocks = {}
+    gameState.playingNotes = {}
+    gameState.midiData = nil
+    gameState.pixelsPerNote = 0
+    gameState.isPaused = false
+    Timer.clear()
+end
+
+--- Load and initialize a MIDI JSON file
+-- @param filepath string Path to the JSON file
+local function loadSong(filepath)
+    resetGameState()
+    
+    -- Load and parse MIDI file
+    local success, result = pcall(MidiParser.load, filepath)
+    if not success then
+        print("Error loading file: " .. tostring(result))
+        return false
+    end
+    
+    gameState.midiData = result
+    gameState.tracks = gameState.midiData.tracks
+    gameState.currentFile = filepath
+    
+    -- Calculate pixels per MIDI note
+    gameState.pixelsPerNote = Config.WINDOW.WIDTH / gameState.midiData.midiRange
+    
+    -- Ensure we have enough track colors
+    Renderer.ensureTrackColors(#gameState.tracks)
+    
+    -- Initialize flocks (one per track)
+    for _ = 1, #gameState.tracks do
+        table.insert(gameState.flocks, {})
+    end
+    
+    gameState.isLoaded = true
+    return true
+end
+
+--- Restart the current song from the beginning
+local function restartSong()
+    if gameState.currentFile then
+        loadSong(gameState.currentFile)
+    end
+end
+
+--- Toggle pause state
+local function togglePause()
+    if gameState.isLoaded then
+        gameState.isPaused = not gameState.isPaused
+    end
+end
+
 --[[
     LOVE2D Callbacks
 ]]
@@ -136,28 +202,19 @@ function love.load(arg)
     -- Initialize renderer
     Renderer.setup()
     
-    -- Validate command line arguments
-    if not arg[1] then
-        error("Usage: love . file.json")
+    -- Load song from command line argument if provided
+    if arg[1] then
+        loadSong(arg[1])
     end
-    
-    -- Load and parse MIDI file
-    gameState.midiData = MidiParser.load(arg[1])
-    gameState.tracks = gameState.midiData.tracks
-    
-    -- Calculate pixels per MIDI note
-    gameState.pixelsPerNote = Config.WINDOW.WIDTH / gameState.midiData.midiRange
-    
-    -- Ensure we have enough track colors
-    Renderer.ensureTrackColors(#gameState.tracks)
-    
-    -- Initialize flocks (one per track)
-    for _ = 1, #gameState.tracks do
-        table.insert(gameState.flocks, {})
-    end
+    -- If no argument, show waiting screen (handled in love.draw)
 end
 
 function love.update(dt)
+    -- Only update if loaded and not paused
+    if not gameState.isLoaded or gameState.isPaused then
+        return
+    end
+    
     Timer.update(dt)
     gameState.time = gameState.time + dt
     
@@ -171,6 +228,12 @@ end
 function love.draw()
     -- Clear background
     Renderer.clearBackground()
+    
+    -- If no song loaded, show instructions
+    if not gameState.isLoaded then
+        Renderer.drawWaitingScreen()
+        return
+    end
     
     -- Draw note trigger points
     Renderer.drawNoteTriggers(
@@ -191,14 +254,31 @@ function love.draw()
     -- Draw boids and get count
     local numBoids = Renderer.drawBoids(gameState.flocks)
     
-    -- Draw stats
-    Renderer.drawStats(gameState.time, numBoids, gameState.defaultFont)
+    -- Draw stats and controls
+    Renderer.drawStats(gameState.time, numBoids, gameState.defaultFont, gameState.isPaused)
     Renderer.drawFPS()
+    Renderer.drawControls(gameState.isPaused)
 end
 
 function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
+    elseif key == "space" then
+        togglePause()
+    elseif key == "r" then
+        restartSong()
+    end
+end
+
+function love.filedropped(file)
+    -- Get the file path and load it
+    local filepath = file:getFilename()
+    
+    -- Check if it's a JSON file (case-insensitive)
+    if filepath:lower():match("%.json$") then
+        loadSong(filepath)
+    else
+        print("Please drop a JSON file")
     end
 end
 

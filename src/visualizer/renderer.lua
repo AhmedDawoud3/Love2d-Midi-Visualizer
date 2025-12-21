@@ -121,7 +121,8 @@ end
 -- @param time number Current time
 -- @param boidCount number Number of boids
 -- @param font Font The font to use
-function Renderer.drawStats(time, boidCount, font)
+-- @param isPaused boolean Whether the song is paused
+function Renderer.drawStats(time, boidCount, font, isPaused)
     love.graphics.setFont(font)
     Color.Reset()
     
@@ -130,9 +131,42 @@ function Renderer.drawStats(time, boidCount, font)
     local milliseconds = time - seconds
     local timeStr = tostring(seconds) .. string.sub(tostring(milliseconds), 2, 4)
     
+    local pauseStr = isPaused and "  [PAUSED]" or ""
+    
     love.graphics.print(
-        "Time: " .. timeStr .. "   Number of boids: " .. boidCount,
+        "Time: " .. timeStr .. "   Boids: " .. boidCount .. pauseStr,
         55, 5
+    )
+end
+
+--- Draw waiting screen when no song is loaded
+function Renderer.drawWaitingScreen()
+    Color.Reset()
+    
+    local width = Config.WINDOW.WIDTH
+    local height = Config.WINDOW.HEIGHT
+    
+    -- Draw centered text
+    love.graphics.printf(
+        "Drag and drop a JSON file to start\n\nor run: love . song.json",
+        0, height / 2 - 40,
+        width,
+        "center"
+    )
+end
+
+--- Draw control hints
+-- @param isPaused boolean Whether the song is paused
+function Renderer.drawControls(isPaused)
+    Color.Reset()
+    
+    local controlText = "[Space] " .. (isPaused and "Resume" or "Pause") .. "  [R] Restart  [Esc] Quit"
+    local textWidth = love.graphics.getFont():getWidth(controlText)
+    
+    love.graphics.print(
+        controlText,
+        Config.WINDOW.WIDTH - textWidth - Config.UI.CONTROLS_MARGIN_RIGHT,
+        Config.WINDOW.HEIGHT - Config.UI.CONTROLS_MARGIN_BOTTOM
     )
 end
 

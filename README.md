@@ -64,13 +64,25 @@ cd Love2d-Midi-Visualizer/
 ---
 
 - ## Run The Game
-  You'll have to provide the json file as a command line argument as following: `love . [The Song File]`
 
+**Option 1: Command Line**
 ```bash
 love . song.json
 ```
 
-Et voilà
+**Option 2: Drag and Drop**
+1. Run `love .` (without arguments)
+2. Drag and drop a JSON file onto the window
+
+---
+
+## Controls
+
+| Key | Action |
+|-----|--------|
+| `Space` | Pause/Resume the song |
+| `R` | Restart the song from beginning |
+| `Esc` | Quit the application |
 
 <!-- PROJECT STRUCTURE -->
 
