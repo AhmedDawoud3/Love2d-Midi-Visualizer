@@ -198,7 +198,11 @@ end
 
 function love.keypressed(key)
     if key == "escape" then
-        midi.gc()
         love.event.quit()
     end
+end
+
+function love.quit()
+    -- Clean up MIDI resources before exiting
+    midi.gc()
 end
