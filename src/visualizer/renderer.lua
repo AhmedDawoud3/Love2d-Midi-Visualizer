@@ -113,25 +113,71 @@ function Renderer.clearBackground()
     colors.background:SetBackground()
 end
 
+--- Decimate trail points for performance
+-- @param points table Trail points {x1, y1, x2, y2, ...}
+-- @param maxPoints number Maximum number of points to keep
+-- @return table Decimated trail points
+local function decimateTrail(points, maxPoints)
+    local numPoints = #points / 2
+    if numPoints <= maxPoints then
+        return points
+    end
+    
+    -- Keep every Nth point
+    local step = math.ceil(numPoints / maxPoints)
+    local decimated = {}
+    
+    for i = 1, numPoints, step do
+        local px = points[(i - 1) * 2 + 1]
+        local py = points[(i - 1) * 2 + 2]
+        if px and py then
+            table.insert(decimated, px)
+            table.insert(decimated, py)
+        end
+    end
+    
+    -- Always include the last point
+    local lastX = points[#points - 1]
+    local lastY = points[#points]
+    if lastX and lastY then
+        table.insert(decimated, lastX)
+        table.insert(decimated, lastY)
+    end
+    
+    return decimated
+end
+
 --- Add a trail to persistent storage when a boid is deleted
 -- @param trail table The trail points array {x1, y1, x2, y2, ...}
 -- @param trackIndex number The track index for coloring
 function Renderer.addPersistentTrail(trail, trackIndex)
     if #trail >= 4 then  -- Need at least 2 points
+        -- Decimate long trails for performance
+        local optimizedTrail = decimateTrail(trail, Config.TRAIL.MAX_TRAIL_POINTS)
+        
         table.insert(persistentTrails, {
-            points = trail,
+            points = optimizedTrail,
             trackIndex = trackIndex,
             createdAt = love.timer.getTime(),
             persistTime = Config.TRAIL.PERSIST_TIME
         })
+        
+        -- Remove oldest trails if we exceed the limit
+        while #persistentTrails > Config.TRAIL.MAX_PERSISTENT_TRAILS do
+            table.remove(persistentTrails, 1)
+        end
     end
 end
 
 --- Update persistent trails (remove expired ones)
 -- @param dt number Delta time
 function Renderer.updatePersistentTrails(dt)
-    -- If permanent mode is enabled, don't remove any trails
+    -- If permanent mode is enabled, don't remove any trails (but still enforce limit)
     if Config.TRAIL.PERMANENT then
+        -- Still enforce the maximum limit
+        while #persistentTrails > Config.TRAIL.MAX_PERSISTENT_TRAILS do
+            table.remove(persistentTrails, 1)
+        end
         return
     end
     
@@ -149,6 +195,23 @@ end
 --- Clear all persistent trails
 function Renderer.clearPersistentTrails()
     persistentTrails = {}
+end
+
+--- Draw a simple trail (fast mode)
+-- @param points table Trail points {x1, y1, x2, y2, ...}
+-- @param trackColor Color The color for the trail
+-- @param alpha number Base alpha value (0-1)
+local function drawSimpleTrail(points, trackColor, alpha)
+    if #points < 4 then return end
+    
+    love.graphics.setLineWidth(Config.TRAIL.MAX_WIDTH)
+    if trackColor then
+        trackColor:Set(alpha)
+    else
+        love.graphics.setColor(1, 1, 1, alpha)
+    end
+    love.graphics.line(points)
+    love.graphics.setLineWidth(1)
 end
 
 --- Draw a beautiful trail with gradient and glow
@@ -223,6 +286,10 @@ end
 --- Draw all persistent trails
 local function drawPersistentTrails()
     local currentTime = love.timer.getTime()
+    local trailCount = #persistentTrails
+    
+    -- Use simple mode if configured or if there are many trails (performance)
+    local useSimpleMode = Config.TRAIL.SIMPLE_MODE or trailCount > 100
     
     for _, trail in ipairs(persistentTrails) do
         local alpha
@@ -239,7 +306,11 @@ local function drawPersistentTrails()
         
         local trackColor = colors.tracks[trail.trackIndex]
         
-        drawBeautifulTrail(trail.points, trackColor, alpha)
+        if useSimpleMode then
+            drawSimpleTrail(trail.points, trackColor, alpha)
+        else
+            drawBeautifulTrail(trail.points, trackColor, alpha)
+        end
     end
 end
 

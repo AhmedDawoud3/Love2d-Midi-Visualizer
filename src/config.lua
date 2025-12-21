@@ -88,7 +88,11 @@ Config.TRAIL = {
     FADE_START_ALPHA = 0.8,    -- Starting alpha for trails
     GLOW_ENABLED = true,       -- Enable glow effect on trails
     GLOW_SIZE = 2,             -- Glow radius multiplier
-    SMOOTH_LINES = true        -- Use smooth line rendering
+    SMOOTH_LINES = true,       -- Use smooth line rendering
+    -- Performance settings
+    MAX_PERSISTENT_TRAILS = 500, -- Maximum number of persistent trails to keep
+    MAX_TRAIL_POINTS = 200,    -- Maximum points per trail (decimation threshold)
+    SIMPLE_MODE = false        -- Use simple single-line rendering (faster)
 }
 
 -- Font settings

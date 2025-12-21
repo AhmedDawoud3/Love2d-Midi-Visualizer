@@ -51,6 +51,13 @@ function Boid:update(dt)
     
     table.insert(self.trail, self.position.x)
     table.insert(self.trail, self.position.y)
+    
+    -- Limit trail length for performance (each point is 2 values: x, y)
+    local maxTrailPoints = Config.TRAIL.MAX_TRAIL_POINTS * 2
+    while #self.trail > maxTrailPoints do
+        table.remove(self.trail, 1)
+        table.remove(self.trail, 1)
+    end
 end
 
 --- Handle edge wrapping/boundary behavior (currently disabled)

@@ -335,6 +335,12 @@ local function setupControlPanel()
         Panel.setButtonLabel("permTrails", label)
     end)
     
+    Panel.addButton("simpleMode", "Simple Trails: OFF (Faster)", function()
+        Config.TRAIL.SIMPLE_MODE = not Config.TRAIL.SIMPLE_MODE
+        local label = Config.TRAIL.SIMPLE_MODE and "Simple Trails: ON (Faster)" or "Simple Trails: OFF (Faster)"
+        Panel.setButtonLabel("simpleMode", label)
+    end)
+    
     Panel.addButton("theme", "Toggle Theme (T)", function()
         Renderer.toggleTheme()
         Panel.setup()  -- Refresh panel colors
