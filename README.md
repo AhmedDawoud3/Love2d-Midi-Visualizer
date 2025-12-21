@@ -82,7 +82,23 @@ love . song.json
 |-----|--------|
 | `Space` | Pause/Resume the song |
 | `R` | Restart the song from beginning |
+| `←` / `→` | Seek backward/forward 5 seconds |
+| `↑` / `↓` | Increase/decrease playback speed |
+| `V` | Cycle visualization mode (boids/particles/waveform) |
+| `T` | Toggle light/dark theme |
+| `P` | Toggle control panel |
+| `1-9` | Toggle mute for tracks 1-9 |
 | `Esc` | Quit the application |
+| Click Timeline | Seek to position |
+
+## Features
+
+- **Speed Control**: Adjust playback speed from 0.25x to 2.0x
+- **Seek/Scrub**: Click on timeline or use arrow keys to jump through the song
+- **Visualization Modes**: Switch between boids, particles, and waveform visualizations
+- **Color Themes**: Toggle between dark and light themes
+- **Track Muting**: Mute individual tracks (1-9 keys)
+- **Control Panel**: Adjust boid parameters in real-time (press P)
 
 <!-- PROJECT STRUCTURE -->
 
@@ -101,11 +117,14 @@ Love2d-Midi-Visualizer/
 │   ├── vector.lua          # Vector math library
 │   └── ...
 ├── src/                     # Source code modules
-│   ├── config.lua          # Configuration constants
+│   ├── config.lua          # Configuration constants & themes
 │   ├── entities/           # Entity classes
 │   │   └── boid.lua        # Boid flocking simulation
 │   ├── midi/               # MIDI handling
 │   │   └── parser.lua      # MIDI JSON file parser
+│   ├── ui/                 # User interface components
+│   │   ├── panel.lua       # Control panel (imgui-like)
+│   │   └── timeline.lua    # Seekable timeline
 │   └── visualizer/         # Visualization modules
 │       └── renderer.lua    # Rendering logic
 └── song.json               # Example MIDI file (JSON format)

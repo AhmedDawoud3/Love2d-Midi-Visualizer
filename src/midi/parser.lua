@@ -27,7 +27,8 @@ function MidiParser.load(filepath)
     local result = {
         tracks = {},
         lowestMidi = math.huge,
-        highestMidi = -math.huge
+        highestMidi = -math.huge,
+        duration = 0
     }
     
     -- Extract tracks that have notes
@@ -35,7 +36,7 @@ function MidiParser.load(filepath)
         if track['notes'] then
             table.insert(result.tracks, track)
             
-            -- Calculate MIDI range
+            -- Calculate MIDI range and duration
             for _, note in ipairs(track['notes']) do
                 if note['midi'] > result.highestMidi then
                     result.highestMidi = note['midi']
@@ -43,12 +44,22 @@ function MidiParser.load(filepath)
                 if note['midi'] < result.lowestMidi then
                     result.lowestMidi = note['midi']
                 end
+                -- Track the end time of the last note
+                local noteEnd = (note['time'] or 0) + (note['duration'] or 0)
+                if noteEnd > result.duration then
+                    result.duration = noteEnd
+                end
             end
         end
     end
     
     -- Calculate derived values
     result.midiRange = result.highestMidi - result.lowestMidi
+    
+    -- Use duration from JSON if available, otherwise use calculated
+    if midiData['duration'] and midiData['duration'] > result.duration then
+        result.duration = midiData['duration']
+    end
     
     return result
 end
