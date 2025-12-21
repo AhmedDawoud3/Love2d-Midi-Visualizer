@@ -116,7 +116,7 @@ local function updateBoids(dt)
     local width = Config.WINDOW.WIDTH
     local height = Config.WINDOW.HEIGHT
     
-    for _, flock in ipairs(gameState.flocks) do
+    for trackIndex, flock in ipairs(gameState.flocks) do
         -- Iterate backwards to safely remove boids
         for i = #flock, 1, -1 do
             local boid = flock[i]
@@ -126,10 +126,15 @@ local function updateBoids(dt)
             
             -- Remove boids that are out of bounds
             if boid:isOutOfBounds(width, height) then
+                -- Save the trail before removing the boid
+                Renderer.addPersistentTrail(boid.trail, trackIndex)
                 table.remove(flock, i)
             end
         end
     end
+    
+    -- Update persistent trails (fade/remove expired ones)
+    Renderer.updatePersistentTrails(dt)
 end
 
 --- Process MIDI tracks and trigger notes
@@ -160,6 +165,7 @@ local function resetGameState()
     gameState.isPaused = false
     gameState.originalTracks = nil
     Timer.clear()
+    Renderer.clearPersistentTrails()
 end
 
 --- Deep copy a table
@@ -288,6 +294,16 @@ local function setupControlPanel()
         -- Speed index updates are only needed for arrow key presets
     end)
     
+    -- Trail persist time slider
+    Panel.addSlider("trailPersist", "Trail Persist (sec)", 1, 30, Config.TRAIL.PERSIST_TIME, function(value)
+        Config.TRAIL.PERSIST_TIME = value
+    end)
+    
+    -- Trail width slider
+    Panel.addSlider("trailWidth", "Trail Max Width", 1, 8, Config.TRAIL.MAX_WIDTH, function(value)
+        Config.TRAIL.MAX_WIDTH = value
+    end)
+    
     -- Boid settings sliders with reduced ranges
     Panel.addSlider("maxSpeed", "Boid Max Speed", 0.5, 5, Config.BOID.MAX_SPEED, function(value)
         Config.BOID.MAX_SPEED = value
@@ -320,6 +336,10 @@ local function setupControlPanel()
     
     Panel.addButton("restart", "Restart Song (R)", function()
         restartSong()
+    end)
+    
+    Panel.addButton("clearTrails", "Clear All Trails", function()
+        Renderer.clearPersistentTrails()
     end)
 end
 

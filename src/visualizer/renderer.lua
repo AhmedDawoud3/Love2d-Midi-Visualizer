@@ -23,6 +23,9 @@ local colors = {
 -- Current theme name
 local currentTheme = "DARK"
 
+-- Persistent trails storage (trails that remain after boids are deleted)
+local persistentTrails = {}
+
 --- Initialize the renderer with colors from current theme
 function Renderer.setup()
     Renderer.applyTheme(currentTheme)
@@ -110,6 +113,123 @@ function Renderer.clearBackground()
     colors.background:SetBackground()
 end
 
+--- Add a trail to persistent storage when a boid is deleted
+-- @param trail table The trail points array {x1, y1, x2, y2, ...}
+-- @param trackIndex number The track index for coloring
+function Renderer.addPersistentTrail(trail, trackIndex)
+    if #trail >= 4 then  -- Need at least 2 points
+        table.insert(persistentTrails, {
+            points = trail,
+            trackIndex = trackIndex,
+            createdAt = love.timer.getTime(),
+            persistTime = Config.TRAIL.PERSIST_TIME
+        })
+    end
+end
+
+--- Update persistent trails (remove expired ones)
+-- @param dt number Delta time
+function Renderer.updatePersistentTrails(dt)
+    local currentTime = love.timer.getTime()
+    
+    -- Remove expired trails
+    for i = #persistentTrails, 1, -1 do
+        local trail = persistentTrails[i]
+        if currentTime - trail.createdAt > trail.persistTime then
+            table.remove(persistentTrails, i)
+        end
+    end
+end
+
+--- Clear all persistent trails
+function Renderer.clearPersistentTrails()
+    persistentTrails = {}
+end
+
+--- Draw a beautiful trail with gradient and glow
+-- @param points table Trail points {x1, y1, x2, y2, ...}
+-- @param trackColor Color The color for the trail
+-- @param alpha number Base alpha value (0-1)
+local function drawBeautifulTrail(points, trackColor, alpha)
+    if #points < 4 then return end
+    
+    local numPoints = #points / 2
+    local trailConfig = Config.TRAIL
+    
+    -- Enable smooth lines if configured
+    if trailConfig.SMOOTH_LINES then
+        love.graphics.setLineStyle("smooth")
+    end
+    
+    -- Draw glow layer first (if enabled)
+    if trailConfig.GLOW_ENABLED then
+        love.graphics.setLineWidth(trailConfig.MAX_WIDTH * trailConfig.GLOW_SIZE)
+        if trackColor then
+            trackColor:Set(alpha * 0.2)
+        else
+            love.graphics.setColor(1, 1, 1, alpha * 0.2)
+        end
+        love.graphics.line(points)
+    end
+    
+    -- Draw trail segments with varying width and alpha (for gradient effect)
+    local segmentSize = math.max(1, math.floor(numPoints / 10))  -- Divide into ~10 segments
+    
+    for segmentStart = 1, numPoints - 1, segmentSize do
+        local segmentEnd = math.min(segmentStart + segmentSize, numPoints - 1)
+        
+        -- Calculate progress (0 = start/oldest, 1 = end/newest)
+        local progress = segmentStart / numPoints
+        
+        -- Width tapers from MAX_WIDTH at newest to MIN_WIDTH at oldest
+        local width = trailConfig.MIN_WIDTH + (trailConfig.MAX_WIDTH - trailConfig.MIN_WIDTH) * progress
+        love.graphics.setLineWidth(width)
+        
+        -- Alpha also fades along the trail
+        local segmentAlpha = alpha * (0.3 + 0.7 * progress)
+        
+        if trackColor then
+            trackColor:Set(segmentAlpha)
+        else
+            love.graphics.setColor(1, 1, 1, segmentAlpha)
+        end
+        
+        -- Extract segment points
+        local segmentPoints = {}
+        for i = segmentStart, segmentEnd + 1 do
+            local px = points[(i - 1) * 2 + 1]
+            local py = points[(i - 1) * 2 + 2]
+            if px and py then
+                table.insert(segmentPoints, px)
+                table.insert(segmentPoints, py)
+            end
+        end
+        
+        if #segmentPoints >= 4 then
+            love.graphics.line(segmentPoints)
+        end
+    end
+    
+    -- Reset line width
+    love.graphics.setLineWidth(1)
+    love.graphics.setLineStyle("rough")
+end
+
+--- Draw all persistent trails
+local function drawPersistentTrails()
+    local currentTime = love.timer.getTime()
+    
+    for _, trail in ipairs(persistentTrails) do
+        local age = currentTime - trail.createdAt
+        local lifeRatio = 1 - (age / trail.persistTime)  -- 1 = just created, 0 = about to expire
+        
+        local alpha = Config.TRAIL.FADE_START_ALPHA * lifeRatio
+        local trackColor = colors.tracks[trail.trackIndex]
+        
+        drawBeautifulTrail(trail.points, trackColor, alpha)
+    end
+end
+
 --- Draw the note trigger points (white circles)
 -- @param lowestMidi number Lowest MIDI note value
 -- @param highestMidi number Highest MIDI note value
@@ -155,6 +275,9 @@ end
 local function drawBoidsMode(flocks, mutedTracks)
     local numBoids = 0
     
+    -- Draw persistent trails first (background layer)
+    drawPersistentTrails()
+    
     for trackIndex, flock in ipairs(flocks) do
         if not mutedTracks[trackIndex] then
             local trackColor = colors.tracks[trackIndex]
@@ -162,13 +285,20 @@ local function drawBoidsMode(flocks, mutedTracks)
             for _, boid in ipairs(flock) do
                 numBoids = numBoids + 1
                 
-                if trackColor then
-                    trackColor:Set()
-                else
-                    Color.Random():Set()
+                -- Draw beautiful trail
+                if #boid.trail >= 4 then
+                    drawBeautifulTrail(boid.trail, trackColor, Config.TRAIL.FADE_START_ALPHA)
                 end
                 
-                boid:show()
+                -- Draw boid body with glow
+                if trackColor then
+                    -- Glow
+                    trackColor:Set(0.3)
+                    love.graphics.circle("fill", boid.position.x, boid.position.y, Config.BOID.SIZE * 2)
+                    -- Core
+                    trackColor:Set(1)
+                end
+                love.graphics.circle("fill", boid.position.x, boid.position.y, Config.BOID.SIZE)
             end
         end
     end
@@ -183,12 +313,20 @@ end
 local function drawParticlesMode(flocks, mutedTracks)
     local numParticles = 0
     
+    -- Draw persistent trails first
+    drawPersistentTrails()
+    
     for trackIndex, flock in ipairs(flocks) do
         if not mutedTracks[trackIndex] then
             local trackColor = colors.tracks[trackIndex]
             
             for _, boid in ipairs(flock) do
                 numParticles = numParticles + 1
+                
+                -- Draw trail with gradient
+                if #boid.trail >= 4 then
+                    drawBeautifulTrail(boid.trail, trackColor, 0.5)
+                end
                 
                 if trackColor then
                     trackColor:Set(0.8)
@@ -222,6 +360,9 @@ local function drawWaveformMode(flocks, mutedTracks, playingNotes)
     local height = Config.WINDOW.HEIGHT
     local centerY = height / 2
     
+    -- Draw persistent trails first
+    drawPersistentTrails()
+    
     -- Draw waveform bars based on playing notes
     for _, note in ipairs(playingNotes or {}) do
         if not mutedTracks[note.indexOfPlaying] then
@@ -250,10 +391,7 @@ local function drawWaveformMode(flocks, mutedTracks, playingNotes)
             
             for _, boid in ipairs(flock) do
                 if #boid.trail >= 4 then
-                    if trackColor then
-                        trackColor:Set(0.5)
-                    end
-                    love.graphics.line(boid.trail)
+                    drawBeautifulTrail(boid.trail, trackColor, 0.5)
                     numItems = numItems + 1
                 end
             end

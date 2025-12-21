@@ -78,6 +78,17 @@ Config.BOID = {
     SPAWN_Y = 500
 }
 
+-- Trail settings
+Config.TRAIL = {
+    PERSIST_TIME = 5.0,        -- How long trails persist after boid deletion (seconds)
+    MAX_WIDTH = 3,             -- Maximum trail line width
+    MIN_WIDTH = 0.5,           -- Minimum trail line width at the end
+    FADE_START_ALPHA = 0.8,    -- Starting alpha for trails
+    GLOW_ENABLED = true,       -- Enable glow effect on trails
+    GLOW_SIZE = 2,             -- Glow radius multiplier
+    SMOOTH_LINES = true        -- Use smooth line rendering
+}
+
 -- Font settings
 Config.FONTS = {
     DEFAULT_PATH = "fonts/MontserratBoldItalic.ttf",
